@@ -10,11 +10,15 @@ import {
 
 import { CartList, OrderSummary } from '../../components/cart';
 import { ShopLayout } from '../../components/layouts/ShopLayout';
+import { useContext } from 'react';
+import { CartContext } from '../../context';
 
 const CartPage = () => {
+  const { numberOfItems } = useContext(CartContext);
+
   return (
     <ShopLayout
-      title='Carrito - 3'
+      title={`Carrito - ${numberOfItems}`}
       pageDescription='Carrito de compras de la tienda'
     >
       <Typography variant='h1' component='h1'>
