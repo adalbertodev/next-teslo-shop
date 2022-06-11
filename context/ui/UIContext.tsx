@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-export interface ContextProps {
+interface ContextProps {
   isMenuOpen: boolean;
 
   toggleSideMenu: () => void;
