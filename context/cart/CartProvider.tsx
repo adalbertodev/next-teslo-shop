@@ -5,19 +5,36 @@ import { ICartProduct } from '../../interfaces';
 import { CartContext, cartReducer } from './';
 
 export interface CartState {
+  isLoaded: boolean;
   cart: ICartProduct[];
   numberOfItems: number;
   subTotal: number;
   tax: number;
   total: number;
+
+  shippingAddress?: ShippingAddress;
+}
+
+export interface ShippingAddress {
+  firstName: string;
+  lastName: string;
+  address: string;
+  address2?: string;
+  zip: string;
+  city: string;
+  country: string;
+  phone: string;
 }
 
 const CART_INITIAL_STATE: CartState = {
+  isLoaded: false,
   cart: [],
   numberOfItems: 0,
   subTotal: 0,
   tax: 0,
-  total: 0
+  total: 0,
+
+  shippingAddress: undefined
 };
 
 interface Props {
@@ -42,6 +59,20 @@ export const CartProvider: FC<Props> = ({ children }) => {
         payload: []
       });
     }
+  }, []);
+
+  useEffect(() => {
+    const cookiesAddress: ShippingAddress =
+      Cookie.get('direction') && JSON.parse(Cookie.get('direction')!);
+
+    if (!cookiesAddress) {
+      return;
+    }
+
+    dispatch({
+      type: '[Cart] - LoadAddress from cookies',
+      payload: cookiesAddress
+    });
   }, []);
 
   useEffect(() => {
@@ -102,13 +133,19 @@ export const CartProvider: FC<Props> = ({ children }) => {
     dispatch({ type: '[Cart] - Remove product in cart', payload: product });
   };
 
+  const updateAddress = (address: ShippingAddress) => {
+    Cookie.set('direction', JSON.stringify(address));
+    dispatch({ type: '[Cart] - Update Address', payload: address });
+  };
+
   return (
     <CartContext.Provider
       value={{
         ...state,
         addProductToCart,
         updateCartQuantity,
-        removeCartProduct
+        removeCartProduct,
+        updateAddress
       }}
     >
       {children}
