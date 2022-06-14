@@ -1,3 +1,4 @@
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
 // import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import {
@@ -15,7 +16,6 @@ import Cookies from 'js-cookie';
 import { ShopLayout } from '../../components/layouts';
 import { countries } from '../../utils';
 // import { jwt } from '../../utils';
-import { useContext, useMemo, useEffect, useState } from 'react';
 import { CartContext } from '../../context';
 
 type FormData = {
@@ -41,7 +41,7 @@ const getAddressFromCookies = (): FormData => {
     address2: address?.address2 || '',
     zip: address?.zip || '',
     city: address?.city || '',
-    country: address?.country || '',
+    country: address?.country || countries[0].code,
     phone: address?.phone || ''
   };
 };
@@ -53,22 +53,38 @@ const AdressPage = () => {
     register,
     handleSubmit,
     getValues,
+    setValue,
+    reset,
     formState: { errors }
   } = useForm<FormData>({
-    defaultValues: getAddressFromCookies()
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      address: '',
+      address2: '',
+      zip: '',
+      city: '',
+      country: countries[0].code,
+      phone: ''
+    }
   });
-  const [defaultCountry, setDefaultCountry] = useState<string | undefined>(
-    undefined
-  );
+  const [country, setCountry] = useState(countries[0].code);
+
+  useEffect(() => {
+    const newValues = getAddressFromCookies();
+    reset(newValues);
+    setCountry(newValues.country);
+  }, [reset]);
 
   const onSubmitAddress = (data: FormData) => {
     updateAddress(data);
     router.push('/checkout/summary');
   };
 
-  useEffect(() => {
-    setDefaultCountry(getValues('country'));
-  }, [getValues]);
+  const onCountryChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCountry(e.target.value);
+    setValue('country', e.target.value);
+  };
 
   return (
     <ShopLayout
@@ -158,9 +174,10 @@ const AdressPage = () => {
                 select
                 variant='filled'
                 label='País'
-                value={defaultCountry || countries[0].code}
+                value={country}
                 {...register('country', {
-                  required: 'Este campo es requerido'
+                  required: 'Este campo es requerido',
+                  onChange: onCountryChange
                 })}
                 error={!!errors.country}
               >
