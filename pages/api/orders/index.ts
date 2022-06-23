@@ -25,8 +25,7 @@ export default function handler(
 }
 
 const createOrder = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
-  const { orderItems, total, shippingAddress } = req.body as IOrder;
-  console.log(shippingAddress);
+  const { orderItems, total } = req.body as IOrder;
 
   const session: any = await getSession({ req });
 
